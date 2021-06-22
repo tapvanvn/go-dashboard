@@ -13,3 +13,11 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+namespace.txt
+deployment/gcloud/credential.json
+
+**/token.txt
+go.sum
+config/env.sh
+**.DS_Store

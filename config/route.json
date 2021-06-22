@@ -1,0 +1,5 @@
+{
+    "wallet":{
+        "indexes":["chain", "wallet_address"]
+    }
+}
