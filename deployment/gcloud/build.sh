@@ -6,10 +6,10 @@ pushd "$DIR/../../"
 
 tag=$(<./version.txt)
 
-server_url=gcr.io/mydefipet
+server_url=tapvanvn
 
-docker build -t $server_url/dashboard:$tag -f docker/gcloud.dockerfile ./
+docker build -t $server_url/gke_dashboard:$tag -f docker/gcloud.dockerfile ./
 
-docker push $server_url/dashboard:$tag
+docker push $server_url/gke_dashboard:$tag
 
 popd

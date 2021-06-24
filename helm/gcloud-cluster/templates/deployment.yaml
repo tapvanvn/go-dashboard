@@ -33,7 +33,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: config
-                  key: CONNECT_STRING_DOCUMENTDB
+                  key: CONNECT_STRING_WSPUBSUB
             - name: CONNECT_STRING_DOCUMENTDB
               valueFrom:
                 secretKeyRef:

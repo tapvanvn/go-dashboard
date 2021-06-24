@@ -2,6 +2,7 @@ package hub
 
 import (
 	"github.com/tapvanvn/go-dashboard/entity"
+	"github.com/tapvanvn/godashboard"
 )
 
 type Hub struct {
@@ -9,6 +10,6 @@ type Hub struct {
 	LastWriteTime int64
 }
 
-func (h *Hub) Signal(params map[string][]entity.Param) {
+func (h *Hub) Signal(params map[string]godashboard.Param) {
 
 }

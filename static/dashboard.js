@@ -128,7 +128,8 @@ function Setup(){
             this.lastSignal = Math.floor(Date.now() / 1000)
             this.container = null
             var self = this
-            this.timer = setTimeout(() => {
+
+            this.timer = setInterval(() => {
                 var now = Math.floor(Date.now() / 1000)
                 if (now - self.lastSignal > 5) {
                     p.dom.unbindStyle(self.dom, 'active')
@@ -159,7 +160,7 @@ function Setup(){
             Object.keys(params).forEach((key)=>{
                 
                 var param = self.getParam(key) 
-                $(param).find('.value').innerHTML(params[key])
+                $(param).find('.value').html(params[key])
             })
             this.lastSignal = Math.floor(Date.now() / 1000)
             p.dom.bindStyle(this.dom, 'active')

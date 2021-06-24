@@ -6,6 +6,7 @@ import (
 
 	"github.com/tapvanvn/go-dashboard/entity"
 	"github.com/tapvanvn/go-dashboard/repository"
+	"github.com/tapvanvn/godashboard"
 )
 
 var __hubmap map[string]*Hub = map[string]*Hub{}
@@ -27,14 +28,14 @@ func GetHub(itemID string) *Hub {
 			Title:          itemID,
 			SignalTime:     0,
 			SignalDuration: 1,
-			Signal:         make(map[string][]entity.Param),
+			Signal:         make(map[string]godashboard.Param),
 		}
 	}
 	hub := &Hub{Item: item, LastWriteTime: 0}
 	__hubmap[itemID] = hub
 	return hub
 }
-func Signal(signal *entity.Signal) {
+func Signal(signal *godashboard.Signal) {
 
 	itemID := strings.TrimSpace(signal.ItemName)
 	if len(itemID) > 0 {
@@ -42,7 +43,23 @@ func Signal(signal *entity.Signal) {
 		h := GetHub(itemID)
 		h.Signal(signal.Params)
 	}
-	data, err := json.Marshal(signal)
+	parseParams := map[string]string{}
+	for key, param := range signal.Params {
+		if param.Type == "string" {
+			parseParams[key] = string(param.Value)
+		} else if param.Type == "int" {
+			parseParams[key] = string(param.Value)
+		} else if param.Type == "uint265" {
+			parseParams[key] = string(param.Value)
+		} else {
+			parseParams[key] = string(param.Value)
+		}
+	}
+	clientSignal := &entity.ClientSignal{
+		ItemName: itemID,
+		Params:   parseParams,
+	}
+	data, err := json.Marshal(clientSignal)
 	if err != nil {
 		return
 	}

@@ -14,6 +14,7 @@ import (
 	"github.com/tapvanvn/go-dashboard/route"
 	"github.com/tapvanvn/go-dashboard/system"
 	"github.com/tapvanvn/go-dashboard/utility"
+	"github.com/tapvanvn/godashboard"
 	engines "github.com/tapvanvn/godbengine"
 	"github.com/tapvanvn/godbengine/engine"
 	"github.com/tapvanvn/godbengine/engine/adapter"
@@ -30,7 +31,7 @@ var pubsubhub gopubsubengine.Hub = nil
 
 func OnDashboardMessage(message string) {
 
-	signal := &entity.Signal{}
+	signal := &godashboard.Signal{}
 	err := json.Unmarshal([]byte(message), signal)
 	if err != nil {
 		return

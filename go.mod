@@ -9,5 +9,6 @@ require (
 	github.com/tapvanvn/godbengine v1.1.7
 	github.com/tapvanvn/gopubsubengine v0.0.20
 	github.com/tapvanvn/gorouter/v2 v2.0.5
+	github.com/tapvanvn/godashboard v0.0.3
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 )
