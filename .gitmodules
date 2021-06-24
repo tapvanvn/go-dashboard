@@ -1,0 +1,6 @@
+[submodule "static/pure"]
+	path = static/pure
+	url = https://github.com/tapvanvn/pure.git
+[submodule "static/nctjs"]
+	path = static/nctjs
+	url = https://github.com/tapvanvn/nctjs.git
