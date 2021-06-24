@@ -1,5 +1,6 @@
 var _sock = null
-var _connect_string = "ws://" + window.location.host+ "/ws"
+var _protocol = window.location.protocol == "https:" ? "wss:" : "ws:"
+var _connect_string = _protocol + "//" + window.location.host+ "/ws"
 var _items = {};
 var _containers = {};
 

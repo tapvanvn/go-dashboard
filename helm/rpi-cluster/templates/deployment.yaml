@@ -44,11 +44,6 @@ spec:
                 secretKeyRef:
                   name: rpi-config
                   key: DOCUMENTDB_DATABASE
-            - name: OBSERVER_URL
-              valueFrom:
-                secretKeyRef:
-                  name: rpi-config
-                  key: OBSERVER_URL
           ports:
             - name: {{ .Values.service.name }}
               containerPort: {{ .Values.service.targetPort }}
