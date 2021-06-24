@@ -21,3 +21,4 @@ deployment/gcloud/credential.json
 go.sum
 config/env.sh
 **.DS_Store
+go-dashboard

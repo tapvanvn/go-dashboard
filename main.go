@@ -14,6 +14,9 @@ import (
 	"github.com/tapvanvn/go-dashboard/route"
 	"github.com/tapvanvn/go-dashboard/system"
 	"github.com/tapvanvn/go-dashboard/utility"
+	engines "github.com/tapvanvn/godbengine"
+	"github.com/tapvanvn/godbengine/engine"
+	"github.com/tapvanvn/godbengine/engine/adapter"
 	"github.com/tapvanvn/gopubsubengine"
 	"github.com/tapvanvn/gopubsubengine/wspubsub"
 	"github.com/tapvanvn/gorouter/v2"
@@ -26,12 +29,13 @@ var subscriber gopubsubengine.Subscriber = nil
 var pubsubhub gopubsubengine.Hub = nil
 
 func OnDashboardMessage(message string) {
+
 	signal := &entity.Signal{}
 	err := json.Unmarshal([]byte(message), signal)
 	if err != nil {
 		return
 	}
-
+	hub.Signal(signal)
 }
 func InitPubSub() {
 
@@ -53,8 +57,33 @@ func InitPubSub() {
 	subscriber.SetProcessor(OnDashboardMessage)
 }
 
+//Start start engine
+func StartEngine(engine *engine.Engine) {
+
+	//read redis define from env
+	//redisConnectString := utility.MustGetEnv("CONNECT_STRING_REDIS")
+	//fmt.Println("redis:", redisConnectString)
+	//redisPool := adapter.RedisPool{}
+
+	//err := redisPool.Init(redisConnectString)
+
+	//if err != nil {
+
+	//	fmt.Println("cannot init redis")
+	//}
+
+	connectString := utility.MustGetEnv("CONNECT_STRING_DOCUMENTDB")
+	firestorePool := adapter.FirestorePool{}
+	firestorePool.Init(connectString)
+	engine.Init(nil, &firestorePool, nil)
+}
+
 func main() {
 	var port = utility.MustGetEnv("PORT")
+
+	engines.InitEngineFunc = StartEngine
+	_ = engines.GetEngine()
+
 	rootPath, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	system.RootPath = rootPath
 	configFile := utility.GetEnv("CONFIG")

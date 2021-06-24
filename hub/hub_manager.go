@@ -1,6 +1,7 @@
 package hub
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/tapvanvn/go-dashboard/entity"
@@ -34,12 +35,18 @@ func GetHub(itemID string) *Hub {
 	return hub
 }
 func Signal(signal *entity.Signal) {
+
 	itemID := strings.TrimSpace(signal.ItemName)
 	if len(itemID) > 0 {
-		hub := GetHub(itemID)
-		hub.Signal(signal.Params)
-	}
 
+		h := GetHub(itemID)
+		h.Signal(signal.Params)
+	}
+	data, err := json.Marshal(signal)
+	if err != nil {
+		return
+	}
+	broadcast <- data
 }
 
 func Run() {
