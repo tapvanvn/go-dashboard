@@ -103,6 +103,9 @@ function Setup(){
             }
             return this.items[item_id];
         },
+        removeItem: function(item_id){
+            this.items[item_id]
+        },
         signal: function(params){
             
             var self = this 
@@ -131,10 +134,24 @@ function Setup(){
 
             this.timer = setInterval(() => {
                 var now = Math.floor(Date.now() / 1000)
-                if (now - self.lastSignal > 5) {
+                if (now - self.lastSignal > 30) {
+                    //destroy me
+                    self.destroy()
+                } else if (now - self.lastSignal > 5) {
                     p.dom.unbindStyle(self.dom, 'active')
                 }
             }, 5);
+        },
+        destroy: function(){
+            if(this.container){
+                this.container.removeItem(this.dom.id)
+            }
+            delete _items[this.dom.id]
+            if(this.timer >= 0) {
+                clearInterval(this.timer)
+                this.dom.parentNode.removeChild(this.dom)
+            }
+            
         },
         setContainer: function(container) {
             this.container = container
