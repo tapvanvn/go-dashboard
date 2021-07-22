@@ -135,8 +135,9 @@ func main() {
 	}
 
 	var router = gorouter.Router{}
+	routePrefix := "v1/"
 
-	router.Init("v1/", string(bytes), handers)
+	router.Init(routePrefix, string(bytes), handers)
 
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -149,6 +150,7 @@ func main() {
 	})
 
 	fileServer := http.FileServer(utility.FileSystem{FS: http.Dir(rootPath + "/static")})
+
 	http.Handle("/", fileServer)
 
 	go hub.Run()

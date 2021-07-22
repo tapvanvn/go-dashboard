@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -13,6 +14,8 @@ type FileSystem struct {
 func (fs FileSystem) Open(path string) (http.File, error) {
 
 	f, err := fs.FS.Open(path)
+
+	fmt.Println(path)
 
 	if err != nil {
 
