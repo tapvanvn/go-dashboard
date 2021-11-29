@@ -3,17 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 
-	"github.com/tapvanvn/go-dashboard/entity"
 	"github.com/tapvanvn/go-dashboard/hub"
 	"github.com/tapvanvn/go-dashboard/route"
 	"github.com/tapvanvn/go-dashboard/system"
-	"github.com/tapvanvn/go-dashboard/utility"
 	"github.com/tapvanvn/godashboard"
 	engines "github.com/tapvanvn/godbengine"
 	"github.com/tapvanvn/godbengine/engine"
@@ -21,6 +18,7 @@ import (
 	"github.com/tapvanvn/gopubsubengine"
 	"github.com/tapvanvn/gopubsubengine/wspubsub"
 	"github.com/tapvanvn/gorouter/v2"
+	"github.com/tapvanvn/goutil"
 )
 
 type Handles []gorouter.RouteHandle
@@ -40,7 +38,7 @@ func OnDashboardMessage(message string) {
 }
 func InitPubSub() {
 
-	pubsubConnectString := utility.MustGetEnv("CONNECT_STRING_WSPUBSUB")
+	pubsubConnectString := system.Config.Hub.Endpoint
 
 	h, err := wspubsub.NewWSPubSubHub(pubsubConnectString)
 
@@ -59,75 +57,32 @@ func InitPubSub() {
 }
 
 //Start start engine
-func StartEngine(engine *engine.Engine) {
+func StartEngine(eng *engine.Engine) {
 
-	//read redis define from env
-	//redisConnectString := utility.MustGetEnv("CONNECT_STRING_REDIS")
-	//fmt.Println("redis:", redisConnectString)
-	//redisPool := adapter.RedisPool{}
+	connectString := system.Config.DocumentDB.ConnectionString
+	var documentPool engine.DocumentPool = nil
+	if system.Config.DocumentDB.Type == "mongodb" {
 
-	//err := redisPool.Init(redisConnectString)
+		mongoPool := &adapter.MongoPool{}
+		err := mongoPool.InitWithDatabase(connectString, system.Config.DocumentDB.Database)
+		if err != nil {
+			panic("cannot init mongo")
+		}
 
-	//if err != nil {
-
-	//	fmt.Println("cannot init redis")
-	//}
-
-	connectString := utility.MustGetEnv("CONNECT_STRING_DOCUMENTDB")
-	firestorePool := adapter.FirestorePool{}
-	firestorePool.Init(connectString)
-	engine.Init(nil, &firestorePool, nil)
+	} else if system.Config.DocumentDB.Type == "firestore" {
+		firestorePool := &adapter.FirestorePool{}
+		err := firestorePool.Init(connectString)
+		if err != nil {
+			panic("cannot init firestore")
+		}
+		documentPool = firestorePool
+	}
+	eng.Init(nil, documentPool, nil)
 }
 
-func main() {
-	var port = utility.MustGetEnv("PORT")
-
-	engines.InitEngineFunc = StartEngine
-	_ = engines.GetEngine()
-
-	rootPath, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	system.RootPath = rootPath
-	configFile := utility.GetEnv("CONFIG")
-	if configFile == "" {
-		configFile = "config.json"
-	}
-	//MARK: init system config
-	jsonFile2, err := os.Open(rootPath + "/config/" + configFile)
-
-	if err != nil {
-
-		panic(err)
-	}
-
-	defer jsonFile2.Close()
-	bytes, err := ioutil.ReadAll(jsonFile2)
-	systemConfig := entity.Config{}
-
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.Unmarshal(bytes, &systemConfig)
-	if err != nil {
-		panic(err)
-	}
-	system.Config = &systemConfig
-
-	if err != nil {
-
-		panic(err)
-	}
+func InitRouter() {
 	//MARK: init router
-	jsonFile, err := os.Open(rootPath + "/config/route.json")
 
-	if err != nil {
-
-		panic(err)
-	}
-
-	defer jsonFile.Close()
-
-	bytes, _ = ioutil.ReadAll(jsonFile)
 	var handers = map[string]gorouter.EndpointDefine{
 
 		"":         {Handles: Handles{route.Root}},
@@ -137,7 +92,7 @@ func main() {
 	var router = gorouter.Router{}
 	routePrefix := "v1/"
 
-	router.Init(routePrefix, string(bytes), handers)
+	router.Init(routePrefix, string("{}"), handers)
 
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -148,10 +103,43 @@ func main() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		hub.ServeWs(w, r)
 	})
+	cacheFileServer := goutil.NewCacheFileServer(http.Dir(system.RootPath + "/static"))
 
-	fileServer := http.FileServer(utility.FileSystem{FS: http.Dir(rootPath + "/static")})
+	fileServer := http.FileServer(cacheFileServer)
 
 	http.Handle("/", fileServer)
+}
+
+func main() {
+
+	var port = goutil.MustGetEnv("PORT")
+
+	rootPath, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+
+	system.RootPath = rootPath
+
+	configPath := goutil.GetEnv("CONFIG_PATH")
+
+	if configPath == "" {
+
+		if rootPath != "/" {
+
+			configPath = fmt.Sprintf("%s/config/%s", system.RootPath, "config.jsonc")
+
+		} else {
+
+			configPath = fmt.Sprintf("/config/%s", "config.jsonc")
+		}
+	}
+	fmt.Println("config from:", configPath)
+
+	system.LoadConfig(configPath)
+
+	engines.InitEngineFunc = StartEngine
+
+	_ = engines.GetEngine()
+
+	InitRouter()
 
 	go hub.Run()
 

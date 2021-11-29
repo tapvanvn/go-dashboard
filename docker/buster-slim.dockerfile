@@ -16,11 +16,8 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
     rm -rf /var/lib/apt/lists/*
         
 COPY --from=build               /src/go-dashboard / 
-COPY config/route.json         /config/route.json 
-COPY config/config.json        /config/config.json 
-COPY deployment/gcloud/credential.json /config/credential.json
 COPY static/ /static
 
-ENV PORT=8080
+ENV PORT=80
 
 ENTRYPOINT ["/go-dashboard"]

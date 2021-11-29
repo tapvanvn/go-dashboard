@@ -1,4 +1,4 @@
-FROM tapvanvn/rpi_dashboard_base AS build
+FROM arm32v7/golang:1.16-alpine AS build
 
 WORKDIR /
 
@@ -18,11 +18,8 @@ RUN apk update \
         && update-ca-certificates 2>/dev/null || true
         
 COPY --from=build               /src/go-dashboard / 
-COPY config/route.json         /config/route.json 
-COPY config/config.json        /config/config.json 
-COPY deployment/gcloud/credential.json /config/credential.json
 COPY static/ /static
 
-ENV PORT=8080
+ENV PORT=80
 
 ENTRYPOINT ["/go-dashboard"]

@@ -1,0 +1,34 @@
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+#1 : rpi64 | aws
+#2 : 366704812217.dkr.ecr.ap-southeast-1.amazonaws.com
+
+num_arg=$#
+if [ $num_arg -ne 1 ]; then 
+    echo "Incorrect call: ./build.sh <target>"
+    echo "example: ./build.sh rpi64"
+    exit 1
+fi
+
+target=$1
+server_url=tapvanvn
+
+pushd "$DIR/../"
+
+dockerfile="docker/$target.dockerfile"
+
+docker_image="dashboard"
+
+if test -f "$dockerfile"; then
+
+    tag="$(<./version.txt)-$target"
+
+    docker build -t $server_url/$docker_image:$tag -f $dockerfile ./
+
+    docker push $server_url/$docker_image:$tag
+else
+    echo "The target $target is not supported"
+    exit 1
+fi
+
+popd

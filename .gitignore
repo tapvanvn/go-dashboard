@@ -22,3 +22,6 @@ go.sum
 config/env.sh
 **.DS_Store
 go-dashboard
+config/config_local.jsonc
+.gitignore
+config/config_prod.yaml
