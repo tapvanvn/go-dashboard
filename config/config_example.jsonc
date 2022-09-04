@@ -1,11 +1,11 @@
 {
-    "hub":{
-        "type":"wspubsub",
-        "endpoint":"ws:/\/ws-pubsub.default/ws"
+    "Hub":{
+        "Type":"wspubsub",
+        "Endpoint":"ws:/\/ws-pubsub.default/ws"
     },
-    "documentdb":{
-        "type":"mongodb",
-        "connection_string":"mongodb://192.168.1.106:27017",
-        "database":"dashboard"
+    "DocDB":{
+        "Provider":"mongodb",
+        "ConnectionString":"mongodb:/\/192.168.1.106:27017",
+        "Database":"dashboard"
     }
 }

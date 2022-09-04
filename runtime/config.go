@@ -1,21 +1,22 @@
-package system
+package runtime
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/tapvanvn/go-dashboard/entity"
 	"github.com/tapvanvn/goutil"
 )
 
-func LoadConfig(configPath string) {
+func ReadConfig(configPath string) (*entity.Config, error) {
 
 	file, err := os.Open(configPath)
 
 	if err != nil {
-		log.Panic("load config file error.", err)
+		fmt.Println("load config file error.", err.Error())
+		return nil, err
 	}
 
 	defer file.Close()
@@ -24,7 +25,8 @@ func LoadConfig(configPath string) {
 
 	if err != nil {
 
-		log.Panic("read config file error.", err)
+		fmt.Println("read config file error.", err.Error())
+		return nil, err
 	}
 	bytes = goutil.TripJSONComment(bytes)
 
@@ -34,7 +36,8 @@ func LoadConfig(configPath string) {
 
 	if err != nil {
 
-		log.Panic("parse config error.", err)
+		fmt.Println("parse config error.", err.Error())
+		return nil, err
 	}
-	Config = config
+	return config, nil
 }

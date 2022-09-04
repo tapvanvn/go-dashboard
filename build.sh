@@ -1,7 +1,6 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-#1 : rpi64 | aws
-#2 : 366704812217.dkr.ecr.ap-southeast-1.amazonaws.com
+#1 : arm64v8 | arm32v7
 
 num_arg=$#
 if [ $num_arg -ne 1 ]; then 
@@ -13,7 +12,7 @@ fi
 target=$1
 server_url=tapvanvn
 
-pushd "$DIR/../"
+pushd "$DIR"
 
 dockerfile="docker/$target.dockerfile"
 

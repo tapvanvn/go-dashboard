@@ -8,13 +8,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/tapvanvn/go-dashboard/common"
 	"github.com/tapvanvn/go-dashboard/hub"
 	"github.com/tapvanvn/go-dashboard/route"
-	"github.com/tapvanvn/go-dashboard/system"
+	"github.com/tapvanvn/go-dashboard/runtime"
+	"github.com/tapvanvn/go-dashboard/utility"
 	"github.com/tapvanvn/godashboard"
-	engines "github.com/tapvanvn/godbengine"
-	"github.com/tapvanvn/godbengine/engine"
-	"github.com/tapvanvn/godbengine/engine/adapter"
 	"github.com/tapvanvn/gopubsubengine"
 	"github.com/tapvanvn/gopubsubengine/wspubsub"
 	"github.com/tapvanvn/gorouter/v2"
@@ -38,7 +37,7 @@ func OnDashboardMessage(message string) {
 }
 func InitPubSub() {
 
-	pubsubConnectString := system.Config.Hub.Endpoint
+	pubsubConnectString := runtime.Config.Hub.Endpoint
 
 	h, err := wspubsub.NewWSPubSubHub(pubsubConnectString)
 
@@ -54,30 +53,6 @@ func InitPubSub() {
 	}
 	subscriber = sub
 	subscriber.SetProcessor(OnDashboardMessage)
-}
-
-//Start start engine
-func StartEngine(eng *engine.Engine) {
-
-	connectString := system.Config.DocumentDB.ConnectionString
-	var documentPool engine.DocumentPool = nil
-	if system.Config.DocumentDB.Type == "mongodb" {
-
-		mongoPool := &adapter.MongoPool{}
-		err := mongoPool.InitWithDatabase(connectString, system.Config.DocumentDB.Database)
-		if err != nil {
-			panic("cannot init mongo")
-		}
-
-	} else if system.Config.DocumentDB.Type == "firestore" {
-		firestorePool := &adapter.FirestorePool{}
-		err := firestorePool.Init(connectString)
-		if err != nil {
-			panic("cannot init firestore")
-		}
-		documentPool = firestorePool
-	}
-	eng.Init(nil, documentPool, nil)
 }
 
 func InitRouter() {
@@ -103,7 +78,7 @@ func InitRouter() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		hub.ServeWs(w, r)
 	})
-	cacheFileServer := goutil.NewCacheFileServer(http.Dir(system.RootPath + "/static"))
+	cacheFileServer := goutil.NewCacheFileServer(http.Dir(runtime.RootPath + "/static"))
 
 	fileServer := http.FileServer(cacheFileServer)
 
@@ -115,29 +90,12 @@ func main() {
 	var port = goutil.MustGetEnv("PORT")
 
 	rootPath, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	runtime.RootPath = rootPath
+	configPath := utility.GetGeneralConfigPath(rootPath)
 
-	system.RootPath = rootPath
-
-	configPath := goutil.GetEnv("CONFIG_PATH")
-
-	if configPath == "" {
-
-		if rootPath != "/" {
-
-			configPath = fmt.Sprintf("%s/config/%s", system.RootPath, "config.jsonc")
-
-		} else {
-
-			configPath = fmt.Sprintf("/config/%s", "config.jsonc")
-		}
+	if err := runtime.InitEngine(configPath, common.EmptyModules); err != nil {
+		panic(err)
 	}
-	fmt.Println("config from:", configPath)
-
-	system.LoadConfig(configPath)
-
-	engines.InitEngineFunc = StartEngine
-
-	_ = engines.GetEngine()
 
 	InitRouter()
 

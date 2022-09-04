@@ -1,17 +1,18 @@
 package entity
 
 type ConfigHub struct {
-	Type     string `json:"type"`
-	Endpoint string `json:"endpoint"`
+	Type     string `json:"Type"`
+	Endpoint string `json:"Endpoint"`
 }
 
 type ConfigDocumentDB struct {
-	Type             string `json:"type"`
-	ConnectionString string `json:"connection_string"`
-	Database         string `json:"database"`
+	Provider         string `json:"Provider"`
+	ConnectionString string `json:"ConnectionString"`
+	Database         string `json:"Database"`
 }
 
 type Config struct {
-	Hub        *ConfigHub        `json:"hub"`
-	DocumentDB *ConfigDocumentDB `json:"documentdb"`
+	Environment string            `json:"Environment"`
+	Hub         *ConfigHub        `json:"Hub"`
+	DocDB       *ConfigDocumentDB `json:"DocDB"`
 }

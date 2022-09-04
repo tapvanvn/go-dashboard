@@ -25,3 +25,5 @@ go-dashboard
 config/config_local.jsonc
 .gitignore
 config/config_prod.yaml
+
+**.temp

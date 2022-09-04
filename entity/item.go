@@ -11,5 +11,6 @@ type Item struct {
 }
 
 func (doc Item) GetID() string {
+
 	return doc.Name
 }
