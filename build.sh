@@ -10,7 +10,7 @@ if [ $num_arg -ne 1 ]; then
 fi
 
 target=$1
-server_url=tapvanvn
+server_url=ghcr.io/tapvanvn/repository
 
 pushd "$DIR"
 
@@ -25,6 +25,8 @@ if test -f "$dockerfile"; then
     docker build -t $server_url/$docker_image:$tag -f $dockerfile ./
 
     docker push $server_url/$docker_image:$tag
+
+    
 else
     echo "The target $target is not supported"
     exit 1
